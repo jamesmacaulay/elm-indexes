@@ -1,0 +1,14 @@
+{
+    "version": "1.0.0",
+    "summary": "A collection of index data structures",
+    "repository": "https://github.com/jamesmacaulay/elm-indexes.git",
+    "license": "MIT",
+    "source-directories": [
+        "src"
+    ],
+    "exposed-modules": [],
+    "dependencies": {
+        "elm-lang/core": "4.0.1 <= v < 5.0.0"
+    },
+    "elm-version": "0.17.0 <= v < 0.18.0"
+}
