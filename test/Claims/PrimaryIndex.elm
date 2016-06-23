@@ -1,8 +1,8 @@
-module Claims.UniqueIndex exposing (..)
+module Claims.PrimaryIndex exposing (claims)
 
 import Check exposing (..)
 import Check.Producer as Producer exposing (Producer)
-import UniqueIndex exposing (UniqueIndex)
+import PrimaryIndex exposing (PrimaryIndex)
 
 
 type alias SimpleValue =
@@ -11,9 +11,9 @@ type alias SimpleValue =
     }
 
 
-simpleEmptyUniqueIndex : UniqueIndex String SimpleValue
-simpleEmptyUniqueIndex =
-    UniqueIndex.empty .id
+simpleEmptyPrimaryIndex : PrimaryIndex String SimpleValue
+simpleEmptyPrimaryIndex =
+    PrimaryIndex.empty .id
 
 
 simpleValueID : Producer String
@@ -38,56 +38,56 @@ twoSimpleValuesWithSameID =
             )
 
 
-simpleUniqueIndex : Producer (UniqueIndex String SimpleValue)
-simpleUniqueIndex =
+simplePrimaryIndex : Producer (PrimaryIndex String SimpleValue)
+simplePrimaryIndex =
     Producer.list simpleValue
-        |> Producer.map (List.foldr UniqueIndex.add simpleEmptyUniqueIndex)
+        |> Producer.map (List.foldr PrimaryIndex.add simpleEmptyPrimaryIndex)
 
 
 claims : Claim
 claims =
-    suite "UniqueIndex"
+    suite "PrimaryIndex"
         [ claim "adding a value to an empty index results in a non-empty index"
             `that` (\value ->
-                        simpleEmptyUniqueIndex
-                            |> UniqueIndex.add value
-                            |> UniqueIndex.isEmpty
+                        simpleEmptyPrimaryIndex
+                            |> PrimaryIndex.add value
+                            |> PrimaryIndex.isEmpty
                    )
             `is` (always False)
             `for` simpleValue
         , claim "adding and removing the same value with an empty index results in an empty index"
             `that` (\value ->
-                        simpleEmptyUniqueIndex
-                            |> UniqueIndex.add value
-                            |> UniqueIndex.remove value
-                            |> UniqueIndex.isEmpty
+                        simpleEmptyPrimaryIndex
+                            |> PrimaryIndex.add value
+                            |> PrimaryIndex.remove value
+                            |> PrimaryIndex.isEmpty
                    )
             `is` (always True)
             `for` simpleValue
         , claim "adding a value means it can be retrieved by its key"
             `that` (\( index, value ) ->
                         index
-                            |> UniqueIndex.add value
-                            |> UniqueIndex.get (UniqueIndex.key index value)
+                            |> PrimaryIndex.add value
+                            |> PrimaryIndex.get (PrimaryIndex.key index value)
                    )
             `is` (\( _, value ) -> Just value)
-            `for` Producer.tuple ( simpleUniqueIndex, simpleValue )
+            `for` Producer.tuple ( simplePrimaryIndex, simpleValue )
         , claim "adding a second value with the same key overwrites the first"
             `that` (\( index, ( value1, value2 ) ) ->
                         index
-                            |> UniqueIndex.add value1
-                            |> UniqueIndex.add value2
-                            |> UniqueIndex.get (UniqueIndex.key index value1)
+                            |> PrimaryIndex.add value1
+                            |> PrimaryIndex.add value2
+                            |> PrimaryIndex.get (PrimaryIndex.key index value1)
                    )
             `is` (\( _, ( _, value2 ) ) -> Just value2)
-            `for` Producer.tuple ( simpleUniqueIndex, twoSimpleValuesWithSameID )
+            `for` Producer.tuple ( simplePrimaryIndex, twoSimpleValuesWithSameID )
         , claim "removing a different version of a value with the same key works the same as removing the current version"
             `that` (\( index, ( value1, value2 ) ) ->
                         index
-                            |> UniqueIndex.add value2
-                            |> UniqueIndex.remove value1
-                            |> UniqueIndex.get (UniqueIndex.key index value2)
+                            |> PrimaryIndex.add value2
+                            |> PrimaryIndex.remove value1
+                            |> PrimaryIndex.get (PrimaryIndex.key index value2)
                    )
             `is` (always Nothing)
-            `for` Producer.tuple ( simpleUniqueIndex, twoSimpleValuesWithSameID )
+            `for` Producer.tuple ( simplePrimaryIndex, twoSimpleValuesWithSameID )
         ]
